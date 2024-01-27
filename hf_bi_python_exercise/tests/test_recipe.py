@@ -1,6 +1,6 @@
 import pytest
 from mock import patch, Mock
-from src.Recipe import Recipe
+from hf_bi_python_exercise.src.Recipe import Recipe
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def setup_data():
 class TestRecipe:
     def test_download_recipe_file(self, setup_data, mocker):
         mocker.patch(
-            "src.Recipe.requests.get",
+            "hf_bi_python_exercise.src.Recipe.requests.get",
             return_value=Mock(
                 status_code=200,
                 text=setup_data['recipes_jsonl']
@@ -40,7 +40,7 @@ class TestRecipe:
 
     def test_download_recipe_file_error(self, setup_data, mocker):
         mocker.patch(
-            "src.Recipe.requests.get",
+            "hf_bi_python_exercise.src.Recipe.requests.get",
             return_value=Mock(
                 status_code=500,
                 text=setup_data['recipes_jsonl']
@@ -149,3 +149,26 @@ class TestRecipe:
         assert hard_average == 0
         assert medium_average == 0
         assert easy_average == 0
+
+    def test_extract_time_in_minutes(self):
+        recipe = Recipe()
+        assert recipe.extract_time_in_minutes("10M") == 10
+        assert recipe.extract_time_in_minutes("10H") == 10 * 60
+        assert recipe.extract_time_in_minutes("PT5M") == 5
+        assert recipe.extract_time_in_minutes("PT8H") == 8 * 60
+        assert recipe.extract_time_in_minutes("Random5M") == 5
+        assert recipe.extract_time_in_minutes("Random8H") == 8 * 60
+
+        assert recipe.extract_time_in_minutes("10H5M") == 10 * 60 + 5
+        assert recipe.extract_time_in_minutes("PT8H10M") == 8 * 60 + 10
+        assert recipe.extract_time_in_minutes("Random8H12M") == 8 * 60 + 12
+
+        assert recipe.extract_time_in_minutes(
+            "10H5M10H5M") == (10 * 60) + 5 + (10*60) + 5
+        assert recipe.extract_time_in_minutes(
+            "PT8H10M5M5M") == 8 * 60 + 10 + 5 + 5
+        assert recipe.extract_time_in_minutes(
+            "Random8H12M3H4H") == (8 * 60) + 12 + (3*60) + (4*60)
+
+        assert recipe.extract_time_in_minutes("PT") == 0
+        assert recipe.extract_time_in_minutes("random") == 0
