@@ -1,6 +1,6 @@
 import pytest
 from mock import patch, Mock
-from hf_bi_python_exercise.Recipe import Recipe
+from src.Recipe import Recipe
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def setup_data():
 class TestRecipe:
     def test_download_recipe_file(self, setup_data, mocker):
         mocker.patch(
-            "hf_bi_python_exercise.Recipe.requests.get",
+            "src.Recipe.requests.get",
             return_value=Mock(
                 status_code=200,
                 text=setup_data['recipes_jsonl']
@@ -37,6 +37,19 @@ class TestRecipe:
 
         assert result == [{"name": "recipe1"}, {
             "name": "recipe2"}, {"name": "recipe3"}]
+
+    def test_download_recipe_file_error(self, setup_data, mocker):
+        mocker.patch(
+            "src.Recipe.requests.get",
+            return_value=Mock(
+                status_code=500,
+                text=setup_data['recipes_jsonl']
+            )
+        )
+
+        recipe = Recipe()
+        with pytest.raises(Exception):
+            recipe.download_recipes_file('http://abc.com/file.json')
 
     def test_is_ingredient_in_recipe(self):
         recipe = Recipe()
@@ -54,6 +67,8 @@ class TestRecipe:
 
         assert found == True
 
+    def test_is_ingredient_in_recipe_not_found(self):
+        recipe = Recipe()
         found = recipe.is_ingredient_in_recipe(
             ["onion"],
             "random text with eggs and 3 egg"
@@ -108,6 +123,8 @@ class TestRecipe:
         assert 'difficulty' in filtered_recipes[1]
         assert 'difficulty' in filtered_recipes[2]
 
+    def test_filter_recipes_no_match(self, setup_data):
+        recipe = Recipe()
         filtered_recipes = recipe.filter_recipes(
             setup_data['recipes'], ["Carrot", "Kathirika", "Inji"])
 

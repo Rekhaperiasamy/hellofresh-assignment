@@ -1,5 +1,5 @@
 import pytest
-from hf_bi_python_exercise.Csv import Csv
+from src.Csv import Csv
 
 
 @pytest.fixture

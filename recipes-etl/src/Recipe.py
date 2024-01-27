@@ -1,6 +1,6 @@
 import requests
 import json
-from hf_bi_python_exercise.Utils import Utils
+from src.Utils import Utils
 
 
 class Recipe:
