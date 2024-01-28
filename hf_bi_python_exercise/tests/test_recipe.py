@@ -1,5 +1,5 @@
 import pytest
-from mock import patch, Mock
+from mock import Mock
 from hf_bi_python_exercise.src.Recipe import Recipe
 
 

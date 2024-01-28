@@ -1,7 +1,5 @@
 import pytest
-import csv
-import io
-from mock import patch, call
+import os
 from hf_bi_python_exercise.src.Csv import Csv
 
 
@@ -10,38 +8,50 @@ def setup_data():
     recipes = [
         {"name": "Easter Leftover Sandwich", "description": "description..."},
         {"name": "Pasta with Pesto Cream Sauce",
-         "description": "description..."},
-        {"name": "Herb Roasted Pork Tenderloin with Preserves",
          "description": "description..."}
     ]
-    print("\nSetting up resources...")
+
+    avg_list = [
+        ['Hard', 'AverageTotalTime', 115],
+        ['Medium', 'AverageTotalTime', 42],
+        ['Easy', 'AverageTotalTime', 16]
+    ]
+
     yield {
-        "recipes": recipes
+        'recipes': recipes,
+        'avg_list': avg_list
     }
-    print("Tear down")
+
+    os.remove(str('avg_output.csv'))
+    os.remove(str('recipes_output.csv'))
+    print('Tear down')
 
 
 class TestCsv:
-    def test_write_dict_to_csv(self, setup_data, mocker):
+    def test_write_dict_to_csv(self, setup_data):
+        file_path = 'recipes_output.csv'
         csv_local = Csv()
 
-        mock_open_func = mocker.mock_open()
-        mock_dict_writer = mocker.patch.object(csv, 'DictWriter')
+        csv_local.write_dict_to_csv(
+            setup_data['recipes'], file_path, separator='|')
 
-        with patch('builtins.open', mock_open_func):
-            csv_local.write_dict_to_csv(
-                setup_data["recipes"], 'output.csv', separator='|')
+        with open(file_path, 'r', newline='', encoding='utf-8') as csv_file:
+            csv_content = csv_file.read()
 
-        mock_open_func.assert_called_once_with(
-            'output.csv', 'w', newline='', encoding='utf-8')
+        expected_content = 'name|description\r\nEaster Leftover Sandwich|description...\r\nPasta with Pesto Cream Sauce|description...\r\n'
 
-        mock_dict_writer.assert_called_once_with(
-            mock_open_func(), fieldnames=setup_data["recipes"][0].keys(), delimiter='|')
+        assert csv_content == expected_content
 
-        csv_instance = mock_dict_writer.return_value
-        csv_instance.writeheader.assert_called_once()
+    def test_write_list_to_csv(self, setup_data):
+        file_path = 'avg_output.csv'
+        csv_local = Csv()
 
-        expected_calls = [call(setup_data["recipes"][0]),
-                          call(setup_data["recipes"][1]),
-                          call(setup_data["recipes"][2])]
-        csv_instance.writerow.assert_has_calls(expected_calls)
+        csv_local.write_list_to_csv(
+            setup_data['avg_list'], file_path, separator='|')
+
+        with open(file_path, 'r', newline='', encoding='utf-8') as csv_file:
+            csv_content = csv_file.read()
+
+        expected_content = 'Hard|AverageTotalTime|115\r\nMedium|AverageTotalTime|42\r\nEasy|AverageTotalTime|16\r\n'
+
+        assert csv_content == expected_content

@@ -56,7 +56,7 @@ class Recipe:
 
         Parameters:
         - ingredients (list): A list of words representing ingredients.
-        - recipe (str): A string that contains all ingredients of a recipe
+        - `recipe (str): A string that contains all ingredients of a recipe`
 
         Returns:
         - Boolean: True if at least one of the words present in the string else False
@@ -67,6 +67,17 @@ class Recipe:
         return False
 
     def get_difficulty(self, prepTime, cookTime):
+        """
+        The difficulty field would have a value of "Hard" if the total of prepTime and cookTime
+        is greater than 1 hour, "Medium" if the total is between 30 minutes and 1 hour,
+        "Easy" if the total is less than 30 minutes, and "Unknown" otherwise
+
+        Parameters:
+        - prepTime, cookTime
+
+        Returns:
+        - String: returns difficulty value
+        """
         total_time = self.extract_time_in_minutes(prepTime + cookTime)
         if total_time > 60:
             return "Hard"
@@ -80,6 +91,16 @@ class Recipe:
         return "Unknown"
 
     def get_average_time_for_difficulty(self, recipes):
+        """
+        Creates another file named Results.csv which contain 3 rows containing the
+        average of total_time aggregated at 3 difficulty levels
+
+        Parameters:
+        - recipes (list): A list of dictionaries representing recipes.
+
+        Returns:
+        - tuple: returns list of avg values
+        """
         hard_total = 0
         hard_count = 0
         hard_average = 0
@@ -121,6 +142,17 @@ class Recipe:
         return hard_average, medium_average, easy_average
 
     def extract_time_in_minutes(self, time_string):
+        """
+        Gets a string which has time represented in hours and minutes 
+        processes the string and returns the time in minutes as integer.
+
+        Parameters:
+        - time_string (str): A string that represents time in hours and minutes.
+                             Eg. PT1H, PT10M
+
+        Returns:
+        - int: returns time in minutes
+        """
         time_pattern = re.compile(r'(\d+)([HM])')
 
         total_minutes = 0
